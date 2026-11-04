@@ -62,6 +62,8 @@ export default tseslint.config(
     rules: {
       'max-lines-per-function': 'off',
       'max-nested-callbacks': 'off',
+      // Optional chaining on fixtures (`players[0]?.room?.phase`) inflates this count without adding branches.
+      complexity: 'off',
       'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
     },
   },

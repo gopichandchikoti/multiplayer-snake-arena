@@ -2,6 +2,43 @@
 
 Newest first. Never put secrets or personal data here.
 
+## [2026-11-03] Milestone 2: authoritative server, protocol and rooms
+
+**Type**: Feature
+**Author**: agent
+
+### What changed
+
+* `@snake/server`: one Node process serving the built client, `/healthz`, `/readyz`, `/api/stats`, `/api/leaderboard`
+  and a `ws` WebSocket endpoint at `/ws`. Rooms (private codes, public quick play), ready state, countdown, fixed-tick
+  matches, spectators, host migration, reconnect with a secret resume token and a 15 s grace period, round summary,
+  per-server leaderboard (memory or JSON file, never called global).
+* Abuse limits: strict message schemas, 2 KiB frames, per-connection token buckets, violation counter that closes the
+  socket, per-IP connection cap, Origin check, hello timeout, heartbeat, slow-consumer protection, secrets redacted from
+  JSON logs, path-traversal-proof static serving, CSP and other security headers.
+* `apps/server/build.mjs` bundles the server to `apps/server/dist/main.mjs`.
+
+### Why
+
+The server is the authority on every position, collision and score; clients only send intent.
+
+### Files touched
+
+`apps/server/**`, `packages/shared/src/protocol.ts` (welcome carries the effective nickname), `.gitattributes`, `.editorconfig`.
+
+### Validation
+
+* `pnpm exec eslint .` clean; `pnpm -r typecheck` clean; 259 tests pass in total (92 server).
+* Integration tests use real `ws` sockets against a real HTTP server with a hand-moved clock, so they are fast and
+  deterministic: handshake, origin refusal, IP cap, hello timeout, malformed/oversized/binary frames, garbage flood,
+  input flood, full lobby-to-leaderboard game, resume after a dropped socket, graceful shutdown.
+* Smoke test of `node apps/server/dist/main.mjs` serving `apps/client/dist`: `/healthz` ok, index 200 with CSP.
+* Not yet verified: behaviour under real network latency (Milestone 3), load (Milestone 5).
+
+### Migration / Setup notes
+
+None. Set `PORT`, `ALLOWED_ORIGINS`, `LEADERBOARD_FILE` as in `.env.example`.
+
 ## [2026-11-03] Milestone 1: deterministic core and offline practice vertical slice
 
 **Type**: Feature

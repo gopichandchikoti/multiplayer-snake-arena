@@ -174,6 +174,7 @@ export const serverMsgSchema = z.discriminatedUnion('type', [
   z.strictObject({
     type: z.literal('welcome'),
     playerId: z.string(),
+    nick: z.string(),
     resume: z.string(),
     serverTime: z.number(),
     resumed: z.boolean(),
