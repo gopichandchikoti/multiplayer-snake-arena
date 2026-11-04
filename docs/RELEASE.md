@@ -36,7 +36,7 @@ variable (see `.env.example`); invalid values stop the process at startup with a
 | `MAX_CONNECTIONS_PER_IP`, `MAX_ROOMS` | 8, 200              | abuse limits                                               |
 | `ROUND_TICKS`                         | 1800                | round length in ticks (15 per second)                      |
 | `TRUST_PROXY`                         | false               | read the client address from `X-Forwarded-For`             |
-| `LOG_LEVEL`                           | info                | `debug                                                     | info | warn | error` |
+| `LOG_LEVEL`                           | info                | one of debug, info, warn, error                            |
 
 Ports used by this project: dev client 5720, dev server 5721, production 5722, Playwright 5730.
 

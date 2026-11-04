@@ -13,14 +13,14 @@ external services, verifiable end to end, and fair by construction.
 1. **One shared, pure, seeded simulation (`@snake/shared`).** Server, client prediction and offline practice all call the
    same `stepWorld`. Consequences: replay tests are meaningful, practice mode cannot drift from online rules, and prediction
    can be unit-tested against the real thing.
-   *Rejected*: separate client/server implementations (drift risk).
+   _Rejected_: separate client/server implementations (drift risk).
 2. **Phaser 3.90.0, not Phaser 4.** `npm` `latest` for Phaser is 4.x now, but the spec says Phaser 3 and Phaser 4 changes
    rendering internals. Pinned to the last 3.x release.
 3. **Plain `ws` with a typed, schema-validated JSON protocol, not Socket.IO.** The game needs ordered messages, our own
    reconnect tokens and exact control over message size and rate limiting. Socket.IO's polling fallback, packet framing
    and automatic reconnect would hide the things this project needs to show and test. The protocol has strict `zod`
    schemas on both ends (unknown keys rejected).
-   *Cost*: reconnect, heartbeat and backoff are implemented here and tested.
+   _Cost_: reconnect, heartbeat and backoff are implemented here and tested.
 4. **No Redis, no PostgreSQL in v1.** Both are optional in the spec. One Node process holds all rooms; the leaderboard
    is in memory or, optionally, a JSON file (`LEADERBOARD_FILE`). The UI states which one is active and never calls a
    per-server board "global". Horizontal scale is out of scope (see KNOWN_LIMITATIONS).
