@@ -38,11 +38,13 @@ function LagBadge({ lag }: { lag: LagInfo }) {
 interface Props {
   hud: HudState;
   offline: boolean;
+  /** True when the viewer has no snake in this round. */
+  watching?: boolean;
   onPause?: () => void;
   onLeave: () => void;
 }
 
-export function Hud({ hud, offline, onPause, onLeave }: Props) {
+export function Hud({ hud, offline, watching = false, onPause, onLeave }: Props) {
   // Your own chip stays first so it never scrolls out of view on a narrow screen.
   const ranked = [...hud.snakes].sort(
     (a, b) => Number(b.isLocal) - Number(a.isLocal) || b.score - a.score || a.slot - b.slot,
@@ -57,6 +59,7 @@ export function Hud({ hud, offline, onPause, onLeave }: Props) {
           <Chip key={snake.slot} snake={snake} />
         ))}
       </ol>
+      {watching ? <span className="badge">Watching</span> : null}
       {hud.lag ? <LagBadge lag={hud.lag} /> : null}
       {offline ? (
         <span className="badge">

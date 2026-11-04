@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import type { Dir } from '@snake/shared';
 import { type Layout, computeLayout, screenDirToWorld, shouldShowDpad } from '../game/layout';
-import type { GameSource } from '../game/source';
+import type { GameSource, HudState } from '../game/source';
 import { isCoarsePointer, settingsStore, useSettings } from '../state/app';
 import { sfx } from '../state/audio';
 import { ArenaCanvas } from './ArenaCanvas';
@@ -19,18 +19,14 @@ const toggleSound = (): void => {
   settingsStore.update((s) => ({ ...s, sound: !s.sound }));
 };
 
-export function GameScreen({ source, onLeave, onFinished }: Props) {
-  const hud = useHud(source);
-  const settings = useSettings();
-  const announcement = useAnnouncer(source);
-  const layout = useRef<Layout>(computeLayout(960, 672));
-
+/** Keyboard, swipe and pad steering for one match, translated from screen directions to arena directions. */
+function useSteering(source: GameSource, hud: HudState, layout: RefObject<Layout>) {
   const turn = useCallback(
     (dir: Dir) => {
       sfx.unlock();
       source.turn(screenDirToWorld(layout.current, dir));
     },
-    [source],
+    [source, layout],
   );
   const togglePause = useCallback(() => {
     if (source.setPaused && hud.phase === 'playing') source.setPaused(!hud.paused);
@@ -41,6 +37,15 @@ export function GameScreen({ source, onLeave, onFinished }: Props) {
     onPause: source.setPaused ? togglePause : undefined,
     onMute: toggleSound,
   });
+  return { turn, togglePause, swipe };
+}
+
+export function GameScreen({ source, onLeave, onFinished }: Props) {
+  const hud = useHud(source);
+  const settings = useSettings();
+  const announcement = useAnnouncer(source);
+  const layout = useRef<Layout>(computeLayout(960, 672));
+  const { turn, togglePause, swipe } = useSteering(source, hud, layout);
 
   useEffect(() => {
     if (hud.phase === 'ended') onFinished();
@@ -49,7 +54,13 @@ export function GameScreen({ source, onLeave, onFinished }: Props) {
   const showPad = shouldShowDpad(settings.dpad, isCoarsePointer());
   return (
     <main className={`game${showPad ? ' game--pad' : ''}`}>
-      <Hud hud={hud} offline={source.offline} onPause={source.setPaused ? togglePause : undefined} onLeave={onLeave} />
+      <Hud
+        hud={hud}
+        offline={source.offline}
+        watching={!source.roster.some((r) => r.isLocal)}
+        onPause={source.setPaused ? togglePause : undefined}
+        onLeave={onLeave}
+      />
       <div className="arena" {...swipe} aria-label="Arena. Steer with the arrow keys, W A S D, or by swiping.">
         <ArenaCanvas
           source={source}

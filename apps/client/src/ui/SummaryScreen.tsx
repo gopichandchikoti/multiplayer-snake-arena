@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { RoundResult, Standing } from '@snake/shared';
 import type { RosterEntry } from '../game/source';
+import { recordRound } from '../state/profile';
 import { describeReason, ordinal } from '../util/format';
 import { SnakeSwatch } from './SnakeSwatch';
 
@@ -42,7 +43,8 @@ export function SummaryScreen({ result, roster, offline, primaryLabel, onPrimary
   // Moving focus to the result lets screen-reader users hear it without hunting for it.
   useEffect(() => {
     heading.current?.focus();
-  }, []);
+    recordRound(offline ? 'practice' : 'online', result, roster.find((r) => r.isLocal)?.slot ?? null);
+  }, [offline, result, roster]);
   return (
     <main className="summary">
       <section className="panel summary__card" aria-labelledby="summary-title">

@@ -2,6 +2,39 @@
 
 Newest first. Never put secrets or personal data here.
 
+## [2026-11-03] Milestone 4: records, spectators, accessibility fixes and the Playwright suite
+
+**Type**: Feature | Fix | Test
+**Author**: agent
+
+### What changed
+
+* Local guest records (rounds, wins, best score; practice and online counted apart; this browser only) shown in Settings
+  and wiped by "Reset saved data". "Watching" badge for spectators.
+* Playwright suite (`e2e/`, `playwright.config.ts`) against the **production bundle in `NODE_ENV=production`** on its own
+  port (5730): practice flow, two-browser online match with a spectator, invite link, quick play, wrong code, axe scans
+  of every main screen in light and dark, keyboard-only flow, dialog focus trap, reduced motion, 200 % text at 320 px,
+  XSS/CSP/cross-origin checks, and a mobile project (Pixel 5 emulation, 320 px, swipe, steering pad, no horizontal scroll).
+* `scripts/load-test.ts` (rooms of 8 real clients), `scripts/overflow-probe.mjs`.
+
+### Why
+
+The browser tests found two real defects that unit tests could not: (1) at 320 px with 200 % text the menu, online menu
+and forms overflowed the viewport by 160-186 px (grid columns sized by min-content, inputs with intrinsic width); fixed
+with `minmax(0, 1fr)` columns, full-width inputs and wrapping headings. (2) lobby names clipped the "(you) · host"
+marker on phones; fixed. The tests also proved the CSP works: injecting a stylesheet from a test was blocked by the page's
+own policy, so the test now changes the root size through the style object instead.
+
+### Validation
+
+* `pnpm exec playwright test`: 18 passed (desktop and mobile projects, ~1.4 min). Console errors, page errors and failed
+  requests are asserted empty (the only filtered line is Chromium's headless "GPU stall due to ReadPixels" note).
+* Unit/integration: 349 tests pass; coverage 96.7 % statements, 92.2 % branches, 95.9 % functions, 98.2 % lines.
+* Load test (16 rooms x 8 clients, 128 sockets, 45 s, in one process): tick lag p50 7.7 ms / p99 15.7 ms, snapshot
+  delivery p50 8.3 ms / p99 17 ms, 0 socket errors, 0 rate-limit hits, whole-process CPU 7 %, RSS 90 MB, mean snapshot
+  1,359 bytes (about 20 kB/s per client at 15 Hz).
+* Not verified: real devices, other browsers, real GPUs, audio output, remote deployment.
+
 ## [2026-11-03] Milestone 3: interpolation, prediction, reconnection and latency handling
 
 **Type**: Feature

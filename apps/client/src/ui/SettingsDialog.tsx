@@ -1,5 +1,6 @@
 import { useId } from 'react';
-import { settingsStore, useSettings } from '../state/app';
+import { settingsStore, useSettings, useStore } from '../state/app';
+import { PROFILE_KEY, emptyProfile, profileStore, type Tally } from '../state/profile';
 import { STORAGE_KEY, defaultSettings, safeStorage, type Settings } from '../state/settings';
 import { NameField } from './NameField';
 import { ThemeCards } from './PracticeSetup';
@@ -80,15 +81,40 @@ function Sound({ settings }: { settings: Settings }) {
   );
 }
 
+function RecordLine({ label, record }: { label: string; record: Tally }) {
+  return (
+    <li>
+      <strong>{label}:</strong> {record.rounds} rounds, {record.wins} wins, best score {record.bestScore}
+    </li>
+  );
+}
+
+function RecordsSection() {
+  const profile = useStore(profileStore);
+  return (
+    <section className="field" aria-labelledby="records-title">
+      <span id="records-title" className="field__label">
+        Your records (this browser only)
+      </span>
+      <ul className="help-grid">
+        <RecordLine label="Online" record={profile.online} />
+        <RecordLine label="Practice" record={profile.practice} />
+      </ul>
+    </section>
+  );
+}
+
 function SavedData() {
   const reset = (): void => {
     if (!window.confirm('Reset all saved settings and create a new guest ID?')) return;
     try {
       safeStorage()?.removeItem(STORAGE_KEY);
+      safeStorage()?.removeItem(PROFILE_KEY);
     } catch {
       // Storage is blocked: the in-memory reset below still applies for this visit.
     }
     settingsStore.set(defaultSettings());
+    profileStore.set(emptyProfile());
   };
   return (
     <div className="field">
@@ -118,6 +144,7 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
         options={SIDES}
         onChange={setter('dpadSide')}
       />
+      <RecordsSection />
       <SavedData />
     </Modal>
   );

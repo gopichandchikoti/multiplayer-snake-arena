@@ -70,6 +70,7 @@ export default tseslint.config(
   {
     // Command-line scripts print their results; that is their interface.
     files: ['scripts/**'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
     rules: { 'no-console': 'off' },
   },
   {

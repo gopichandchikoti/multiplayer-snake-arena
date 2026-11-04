@@ -1,5 +1,7 @@
 /* ---------- buttons and form controls ---------- */
 .btn {
+  max-width: 100%;
+  text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +51,7 @@
 
 .field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gap-1);
 }
 
@@ -61,6 +64,8 @@
 }
 
 .input {
+  width: 100%;
+  min-width: 0;
   min-height: var(--touch);
   padding: 0 var(--gap-3);
   border: 2px solid var(--border);
@@ -235,6 +240,7 @@ fieldset {
 }
 
 .menu__title {
+  overflow-wrap: anywhere;
   font-size: var(--text-hero);
   font-weight: 800;
   max-width: 11ch;
@@ -248,6 +254,8 @@ fieldset {
 
 .panel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: var(--gap-4);
   padding: var(--gap-5);
   border: 2px solid var(--hairline);
@@ -261,6 +269,7 @@ fieldset {
 
 .stack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gap-3);
 }
 
@@ -575,7 +584,7 @@ kbd {
 
 @media (max-width: 820px) {
   .menu {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
   }
 
@@ -620,6 +629,7 @@ kbd {
 
 .input--code {
   width: 9ch;
+  flex: none;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   text-align: center;
@@ -651,4 +661,14 @@ kbd {
 .badge--bad {
   border-color: var(--danger);
   color: var(--text);
+}
+
+.theme-card {
+  align-content: start;
+}
+
+/* Lobby names may wrap so "(you) · host" is never cut off on a phone. */
+.standing--lobby .standing__name {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
