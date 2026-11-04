@@ -121,8 +121,14 @@ describe('primitives', () => {
 describe('menu, setup, settings, help', () => {
   it('MenuScreen offers the three actions and saves the typed name', async () => {
     const user = userEvent.setup();
-    const handlers = { onPractice: vi.fn(), onHelp: vi.fn(), onSettings: vi.fn() };
-    render(<MenuScreen {...handlers} />);
+    const handlers = {
+      onOnline: vi.fn(),
+      onPractice: vi.fn(),
+      onHelp: vi.fn(),
+      onSettings: vi.fn(),
+      onJoinInvite: vi.fn(),
+    };
+    render(<MenuScreen invite={null} {...handlers} />);
     await user.type(screen.getByLabelText('Your name'), 'Ada');
     expect(settingsStore.get().nickname).toBe('Ada');
     await user.click(screen.getByRole('button', { name: 'Practice against bots' }));
@@ -208,6 +214,7 @@ describe('Hud and summary', () => {
     remainingMs: 75_000,
     paused: false,
     result: null,
+    lag: null,
     snakes: [
       { slot: 1, name: 'Pip', score: 50, kills: 0, length: 5, alive: true, surge: true, aegis: false, isLocal: false },
       { slot: 0, name: 'Ada', score: 10, kills: 0, length: 4, alive: true, surge: false, aegis: true, isLocal: true },

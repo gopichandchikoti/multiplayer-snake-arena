@@ -1,3 +1,4 @@
+import type { LagInfo } from '../net/clockSync';
 import type { HudSnake, HudState } from '../game/source';
 import { formatClock } from '../util/format';
 import { SnakeSwatch } from './SnakeSwatch';
@@ -15,6 +16,22 @@ function Chip({ snake }: { snake: HudSnake }) {
       {snake.alive && snake.surge ? <span className="chip__fx">⚡ surge</span> : null}
       {snake.alive && snake.aegis ? <span className="chip__fx">◈ aegis</span> : null}
     </li>
+  );
+}
+
+const BARS: Record<LagInfo['level'], string> = { good: '▂▄▆', fair: '▂▄·', poor: '▂··', bad: '···' };
+const LEVEL_TEXT: Record<LagInfo['level'], string> = { good: 'Good', fair: 'Fair', poor: 'Poor', bad: 'Bad' };
+
+/** Ping with both bars and a word, so quality never depends on colour. */
+function LagBadge({ lag }: { lag: LagInfo }) {
+  const text = LEVEL_TEXT[lag.level];
+  return (
+    <span
+      className={`badge badge--lag badge--${lag.level}`}
+      aria-label={`Network quality ${text}, ${lag.rtt} milliseconds, jitter ${lag.jitter}`}
+    >
+      <span aria-hidden="true">{BARS[lag.level]}</span> {lag.rtt} ms <span className="hide-sm">{text}</span>
+    </span>
   );
 }
 
@@ -40,6 +57,7 @@ export function Hud({ hud, offline, onPause, onLeave }: Props) {
           <Chip key={snake.slot} snake={snake} />
         ))}
       </ol>
+      {hud.lag ? <LagBadge lag={hud.lag} /> : null}
       {offline ? (
         <span className="badge">
           Offline<span className="hide-sm"> practice · not ranked</span>

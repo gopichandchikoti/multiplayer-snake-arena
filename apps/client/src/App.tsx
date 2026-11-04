@@ -7,6 +7,7 @@ import { MenuScreen } from './ui/MenuScreen';
 import { PracticeSetup } from './ui/PracticeSetup';
 import { SettingsDialog } from './ui/SettingsDialog';
 import { SummaryScreen } from './ui/SummaryScreen';
+import { OnlineScreen } from './ui/online/OnlineScreen';
 import { type Flow, useAppFlow } from './ui/useAppFlow';
 
 type Dialog = 'settings' | 'help' | null;
@@ -23,6 +24,9 @@ function CurrentScreen({ flow, onDialog }: ScreenProps) {
     case 'menu':
       return (
         <MenuScreen
+          invite={flow.invite}
+          onJoinInvite={flow.joinInvite}
+          onOnline={flow.playOnline}
           onPractice={flow.openSetup}
           onHelp={() => {
             onDialog('help');
@@ -43,6 +47,8 @@ function CurrentScreen({ flow, onDialog }: ScreenProps) {
           />
         </main>
       );
+    case 'online':
+      return <OnlineScreen session={screen.session} onExit={flow.toMenu} />;
     case 'game':
       return <GameScreen source={screen.source} onLeave={flow.toMenu} onFinished={flow.finish} />;
     case 'summary': {

@@ -2,6 +2,45 @@
 
 Newest first. Never put secrets or personal data here.
 
+## [2026-11-03] Milestone 3: interpolation, prediction, reconnection and latency handling
+
+**Type**: Feature
+**Author**: agent
+
+### What changed
+
+* Client networking: `GameSocket` (validated messages, exponential backoff with jitter, resume token, ping loop),
+  `ClockSync` (Cristian's algorithm over the lowest-RTT sample, smoothed ping and jitter), `OnlineSession` (room and
+  match state, notices, invite links), `OnlineGame` (interpolates other snakes about two ticks behind the server,
+  predicts the player's own snake by replaying unacknowledged inputs, reconciles on every snapshot).
+* Online screens: connection states, online menu (quick play, create, join by code, watch), lobby (ready toggle, host-only
+  arena choice, countdown on the server clock, copy invite link), summary, leaderboard panel (loading / error / empty),
+  HUD network badge (ping, jitter, level as bars *and* words), connection banner that keeps the seat on screen while
+  reconnecting. Invite links (`?room=CODE`) never connect on their own.
+
+### Why
+
+Steering must feel instant at any latency while the server stays the only authority.
+
+### Files touched
+
+`apps/client/src/net/**`, `apps/client/src/ui/online/**`, `apps/client/src/ui/*`, `apps/server/test/latency*.ts`.
+
+### Validation
+
+* Typecheck and eslint clean; 339 tests pass; coverage 96.3 % statements, 91.8 % branches, 95.4 % functions, 97.9 % lines.
+* **Real-network test** (`apps/server/test/latency.test.ts`): the client's real `GameSocket`/`OnlineSession` talk to the real
+  server through a TCP proxy that adds delay and jitter. Configured round trip 50 / 150 / 300 ms measured 61 / 175 / 347 ms
+  (the proxy adds a little); the player's own snake visibly turned 46 / 79 / 48 ms after the key press; both players
+  received identical results. A 1.2 s stall and a hard disconnect both recover (same seat, round completes). Server tick
+  lag over the run: p50 8.3 ms, p99 15.7 ms (Windows timer granularity is about 15.6 ms).
+* "Packet loss" is modelled as a stall or a cut because WebSocket runs on TCP, which hides individual lost packets.
+* Not verified: real mobile networks, browsers other than Chromium, a real GPU.
+
+### Migration / Setup notes
+
+None.
+
 ## [2026-11-03] Milestone 2: authoritative server, protocol and rooms
 
 **Type**: Feature

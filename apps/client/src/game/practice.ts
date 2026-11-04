@@ -171,6 +171,7 @@ export class PracticeGame implements GameSource {
       snakes,
       paused: this.paused,
       result: phase === 'ended' ? this.world.result : null,
+      lag: null,
     };
   }
 

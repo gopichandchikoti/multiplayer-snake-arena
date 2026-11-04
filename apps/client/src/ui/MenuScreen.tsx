@@ -2,12 +2,15 @@ import { Logo } from './Logo';
 import { NameField } from './NameField';
 
 interface Props {
+  invite: string | null;
+  onJoinInvite: () => void;
+  onOnline: () => void;
   onPractice: () => void;
   onHelp: () => void;
   onSettings: () => void;
 }
 
-export function MenuScreen({ onPractice, onHelp, onSettings }: Props) {
+export function MenuScreen({ invite, onJoinInvite, onOnline, onPractice, onHelp, onSettings }: Props) {
   return (
     <main id="main" className="menu">
       <div className="menu__intro">
@@ -23,8 +26,19 @@ export function MenuScreen({ onPractice, onHelp, onSettings }: Props) {
           Choose how to play
         </h2>
         <NameField />
+        {invite ? (
+          <div className="notice" role="region" aria-label="Invitation">
+            <p>You were invited to room {invite}.</p>
+            <button type="button" className="btn btn--primary" onClick={onJoinInvite}>
+              Join room {invite}
+            </button>
+          </div>
+        ) : null}
         <div className="stack">
-          <button type="button" className="btn btn--primary" onClick={onPractice}>
+          <button type="button" className="btn btn--primary" onClick={onOnline}>
+            Play online
+          </button>
+          <button type="button" className="btn" onClick={onPractice}>
             Practice against bots
           </button>
           <button type="button" className="btn" onClick={onHelp}>
@@ -35,7 +49,8 @@ export function MenuScreen({ onPractice, onHelp, onSettings }: Props) {
           </button>
         </div>
         <p className="field__hint">
-          Practice runs offline in your browser and is never ranked. No account is needed for anything.
+          Online play needs the game server. Practice runs offline in your browser and is never ranked. No account is
+          needed for anything.
         </p>
       </section>
     </main>

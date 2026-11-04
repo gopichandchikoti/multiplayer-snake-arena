@@ -1,4 +1,5 @@
 import type { Dir, FoodItem, GameEvent, PowerUpItem, RoundResult, ThemeId } from '@snake/shared';
+import type { LagInfo } from '../net/clockSync';
 import type { DisplaySnake } from './tween';
 
 export interface RosterEntry {
@@ -40,6 +41,8 @@ export interface HudState {
   snakes: HudSnake[];
   paused: boolean;
   result: RoundResult | null;
+  /** Network quality; null when there is no network (offline practice) or no measurement yet. */
+  lag: LagInfo | null;
 }
 
 /**

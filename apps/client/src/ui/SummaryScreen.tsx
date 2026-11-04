@@ -11,6 +11,8 @@ interface Props {
   primaryLabel: string;
   onPrimary: () => void;
   onMenu: () => void;
+  /** Extra line under the result, e.g. what happens next online. */
+  note?: string;
 }
 
 function headline(result: RoundResult, roster: readonly RosterEntry[]): string {
@@ -35,7 +37,7 @@ function StandingRow({ standing, entry }: { standing: Standing; entry: RosterEnt
   );
 }
 
-export function SummaryScreen({ result, roster, offline, primaryLabel, onPrimary, onMenu }: Props) {
+export function SummaryScreen({ result, roster, offline, primaryLabel, onPrimary, onMenu, note }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   // Moving focus to the result lets screen-reader users hear it without hunting for it.
   useEffect(() => {
@@ -48,6 +50,7 @@ export function SummaryScreen({ result, roster, offline, primaryLabel, onPrimary
           {headline(result, roster)}
         </h1>
         <p className="field__hint">{describeReason(result.reason)}</p>
+        {note ? <p className="field__hint">{note}</p> : null}
         {offline ? <span className="badge">Offline practice · not ranked</span> : null}
         <ol className="standings" aria-label="Final standings">
           {result.standings.map((standing) => (

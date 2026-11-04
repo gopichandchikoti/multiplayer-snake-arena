@@ -583,3 +583,72 @@ kbd {
     max-width: 14ch;
   }
 }
+
+/* ---------- online ---------- */
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: var(--gap-2) var(--gap-4);
+  background: var(--danger);
+  color: var(--bg);
+  text-align: center;
+  font-weight: 600;
+}
+
+.banner .btn {
+  min-height: 36px;
+  margin-left: var(--gap-2);
+  color: var(--text);
+}
+
+.notice {
+  padding: var(--gap-3);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-m);
+}
+
+.code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.18em;
+  padding: 2px 10px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-s);
+}
+
+.input--code {
+  width: 9ch;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  text-align: center;
+}
+
+.standing--lobby {
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--gap-2) var(--gap-3);
+  text-align: left;
+  border-bottom: 1px solid var(--hairline);
+  font-variant-numeric: tabular-nums;
+}
+
+.table thead th {
+  color: var(--text-dim);
+  font-size: var(--text-s);
+}
+
+.badge--poor,
+.badge--bad {
+  border-color: var(--danger);
+  color: var(--text);
+}

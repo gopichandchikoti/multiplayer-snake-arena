@@ -29,6 +29,7 @@ export class FakeGame implements GameSource {
     remainingMs: 90_000,
     paused: false,
     result: null,
+    lag: null,
     snakes: roster.map((r) => ({
       slot: r.slot,
       name: r.name,
