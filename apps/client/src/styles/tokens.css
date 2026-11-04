@@ -1,0 +1,80 @@
+/* Design tokens. Every colour pair used for text or controls is checked in test/tokens.test.ts. */
+:root {
+  --font-display: 'Bricolage Grotesque Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Instrument Sans Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 18px;
+  --gap-1: 4px;
+  --gap-2: 8px;
+  --gap-3: 12px;
+  --gap-4: 16px;
+  --gap-5: 24px;
+  --gap-6: 40px;
+
+  --text-s: 0.875rem;
+  --text-m: 1rem;
+  --text-l: 1.25rem;
+  --text-xl: clamp(1.75rem, 4vw, 2.75rem);
+  --text-hero: clamp(2.5rem, 8vw, 5rem);
+
+  --touch: 44px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* scheme:dark */
+:root {
+  color-scheme: dark;
+  --bg: #11161c;
+  --surface: #1a222b;
+  --surface-raised: #232e3a;
+  --hairline: #2a3745;
+  --border: #6b7c8f;
+  --text: #f7f1e3;
+  --text-dim: #b7ae98;
+  --accent: #f2b134;
+  --accent-hover: #ffc455;
+  --accent-ink: #1a1305;
+  --danger: #ff7a59;
+  --success: #8fd37c;
+  --focus: #8fd3ff;
+}
+
+/* scheme:light */
+:root[data-scheme='light'] {
+  color-scheme: light;
+  --bg: #f7f1e3;
+  --surface: #fffaf0;
+  --surface-raised: #efe6d2;
+  --hairline: #d9cdb2;
+  --border: #6e6350;
+  --text: #1b1612;
+  --text-dim: #5e5545;
+  --accent: #f2b134;
+  --accent-hover: #e09a12;
+  --accent-ink: #1a1305;
+  --danger: #b3351a;
+  --success: #2f6b1f;
+  --focus: #0b5fa5;
+}
+
+/* scheme:light-system */
+@media (prefers-color-scheme: light) {
+  :root[data-scheme='system'] {
+    color-scheme: light;
+    --bg: #f7f1e3;
+    --surface: #fffaf0;
+    --surface-raised: #efe6d2;
+    --hairline: #d9cdb2;
+    --border: #6e6350;
+    --text: #1b1612;
+    --text-dim: #5e5545;
+    --accent: #f2b134;
+    --accent-hover: #e09a12;
+    --accent-ink: #1a1305;
+    --danger: #b3351a;
+    --success: #2f6b1f;
+    --focus: #0b5fa5;
+  }
+}

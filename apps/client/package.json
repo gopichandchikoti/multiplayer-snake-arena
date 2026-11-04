@@ -1,0 +1,30 @@
+{
+  "name": "@snake/client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phaser 3 + React browser client for Multiplayer Snake Arena.",
+  "scripts": {
+    "dev": "vite --port 5720 --strictPort",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview --port 5722 --strictPort",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "@fontsource-variable/instrument-sans": "5.3.0",
+    "@snake/shared": "workspace:*",
+    "phaser": "3.90.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.2.1",
+    "vite": "8.3.5"
+  }
+}

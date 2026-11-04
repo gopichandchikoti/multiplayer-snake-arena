@@ -1,0 +1,16 @@
+{
+  "name": "@snake/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic snake simulation, wire protocol and pure helpers shared by server and client.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

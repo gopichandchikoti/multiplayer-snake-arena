@@ -1,0 +1,58 @@
+import type { HudSnake, HudState } from '../game/source';
+import { formatClock } from '../util/format';
+import { SnakeSwatch } from './SnakeSwatch';
+
+function Chip({ snake }: { snake: HudSnake }) {
+  const classes = ['chip', snake.isLocal ? 'chip--local' : '', snake.alive ? '' : 'chip--out']
+    .filter(Boolean)
+    .join(' ');
+  return (
+    <li className={classes}>
+      <SnakeSwatch slot={snake.slot} />
+      <span className="chip__name">{snake.isLocal ? `${snake.name} (you)` : snake.name}</span>
+      <span className="chip__score">{snake.score}</span>
+      {snake.alive ? null : <span className="chip__fx">out</span>}
+      {snake.alive && snake.surge ? <span className="chip__fx">⚡ surge</span> : null}
+      {snake.alive && snake.aegis ? <span className="chip__fx">◈ aegis</span> : null}
+    </li>
+  );
+}
+
+interface Props {
+  hud: HudState;
+  offline: boolean;
+  onPause?: () => void;
+  onLeave: () => void;
+}
+
+export function Hud({ hud, offline, onPause, onLeave }: Props) {
+  // Your own chip stays first so it never scrolls out of view on a narrow screen.
+  const ranked = [...hud.snakes].sort(
+    (a, b) => Number(b.isLocal) - Number(a.isLocal) || b.score - a.score || a.slot - b.slot,
+  );
+  return (
+    <header className="hud">
+      <div className="hud__timer" role="timer" aria-label="Time left">
+        {formatClock(hud.remainingMs)}
+      </div>
+      <ol className="scoreboard" aria-label="Scoreboard">
+        {ranked.map((snake) => (
+          <Chip key={snake.slot} snake={snake} />
+        ))}
+      </ol>
+      {offline ? (
+        <span className="badge">
+          Offline<span className="hide-sm"> practice · not ranked</span>
+        </span>
+      ) : null}
+      {onPause ? (
+        <button type="button" className="btn" onClick={onPause} aria-label={hud.paused ? 'Resume' : 'Pause'}>
+          {hud.paused ? 'Resume' : 'Pause'}
+        </button>
+      ) : null}
+      <button type="button" className="btn btn--quiet" onClick={onLeave}>
+        Leave
+      </button>
+    </header>
+  );
+}
