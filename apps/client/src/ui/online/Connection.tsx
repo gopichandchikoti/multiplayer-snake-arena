@@ -35,6 +35,7 @@ export function ConnectingView({ state, onRetry, onBack }: ViewProps) {
           {title}
         </h1>
         <p role="status">{detail}</p>
+        {state.notice ? <p role="alert">{state.notice.message}</p> : null}
         <p className="field__hint">Online play needs the game server. Offline practice works without it.</p>
         <div className="row">
           {busy ? null : (

@@ -85,6 +85,18 @@ describe('connection views', () => {
     expect(onBack).toHaveBeenCalled();
   });
 
+  it('shows the reason the server gave, such as an out-of-date client', () => {
+    const notice = { code: 'unsupported_version' as const, message: 'This client is out of date. Reload the page.' };
+    render(
+      <ConnectingView
+        state={stateWith({ connection: { state: 'closed', attempt: 0, retryInMs: null }, notice })}
+        onRetry={vi.fn()}
+        onBack={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('out of date');
+  });
+
   it('says when the game was opened in another tab', () => {
     render(<ConnectingView state={stateWith({ farewell: 'replaced' })} onRetry={vi.fn()} onBack={vi.fn()} />);
     expect(screen.getByRole('heading', { name: 'Opened somewhere else' })).toBeInTheDocument();
