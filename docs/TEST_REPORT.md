@@ -84,3 +84,17 @@ heard by a person, and the straight-coasting snake during a reconnect).
 
 Real mobile devices and networks; Safari and Firefox; a real GPU or frame-rate measurement; audio by ear; Core Web Vitals;
 Docker image build; GitHub Actions run; deployment behind a real TLS proxy; screen readers (NVDA, VoiceOver) by hand.
+
+## Fresh-clone verification
+
+Run on commit `53d396d` (later commits change documentation only), cloned with `git clone` into an empty directory outside
+the project (path without spaces), with the browser already present in the shared Playwright cache:
+
+| Step                             | Result                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `node scripts/bootstrap.mjs`     | dependencies installed from the lockfile in about 10 s                                                                     |
+| `pnpm verify`                    | lint clean, format clean, typecheck clean, 350 tests pass, coverage 96.65 / 92.18 / 95.92 / 98.19 %, build ok (1 min 30 s) |
+| `pnpm exec playwright test`      | 18 passed (1 min 30 s)                                                                                                     |
+| `node apps/server/dist/main.mjs` | `/healthz` returned `{"status":"ok"}`, `/` returned 200                                                                    |
+
+Not exercised: the download of the browser itself (`bootstrap.mjs --browsers`) because Chromium was already cached.
