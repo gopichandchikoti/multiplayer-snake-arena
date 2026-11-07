@@ -10,7 +10,6 @@
     "server": {
       "root": "apps/server",
       "framework": "node",
-      "runtime": "nodejs22.x",
       "entrypoint": "src/vercel.ts",
       "buildCommand": "pnpm run typecheck"
     }

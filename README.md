@@ -186,10 +186,11 @@ To import the whole app in Vercel:
 1. Import the GitHub repository and select the branch containing the root `vercel.json`.
 2. Set **Root Directory** to **`./`**, the repository root. Do not select `apps/client` or `apps/server`.
 3. Select **Services** as the **Application Preset**.
-4. Choose **Refresh** if needed. The service list should contain **client** and **server**. A suggested single
-   `app` service rooted at `apps/client` means the import is still looking at the frontend directory.
-5. Import the multi-service project. Each service owns its build settings in `vercel.json`; do not replace them
-   with a project-wide Vite build.
+4. Choose **Refresh** if needed and confirm that the page says **Configuration defined in vercel.json**.
+   The import preview can show only the client even when the backend is configured; verify both services in the
+   deployment build logs rather than relying on the preview cards.
+5. Choose **Deploy**. Each service owns its build settings in `vercel.json`; do not replace them with a
+   project-wide Vite build. After deployment, `/readyz` should return `{"ready":true}`; then test a two-player room.
 
 Refresh rereads the selected Git branch and project directory. It does not upload local edits or search parent
 directories for this root configuration. Commit and push configuration changes before refreshing. The Vercel project
@@ -200,7 +201,11 @@ name is only a label; it does not determine which services are deployed.
 | `client` | `apps/client` | `/` and all paths not assigned to the backend  |
 | `server` | `apps/server` | `/api`, `/api/*`, `/ws`, `/healthz`, `/readyz` |
 
-The client is a static Vite build. The server uses Node.js 22 and `src/vercel.ts`.
+The client is a static Vite build. The server uses the `node` framework and `src/vercel.ts`. Its
+[`engines.node`](apps/server/package.json) range selects Node.js 22. Leave the service `runtime` unset so Vercel detects
+it; `nodejs22.x` is rejected as a service runtime by Vercel CLI 65.11.0. See Vercel's
+[service configuration](https://vercel.com/docs/services/config-reference) and
+[Node.js version selection](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) references.
 Browser requests use the same public domain: `/api/leaderboard` for standings and `/ws` for the game connection.
 The client service has no server-side functions calling the server, and the server calls no other service. There are
 therefore no internal-only services or service bindings in this deployment. Do not inject a private binding URL into
