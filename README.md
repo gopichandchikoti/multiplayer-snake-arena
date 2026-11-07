@@ -178,8 +178,22 @@ Rooms and resume tokens remain in memory; a server restart ends active matches.
 
 ### Vercel services
 
-The root [vercel.json](vercel.json) defines two services in one project. Import the repository with its Root Directory
-set to the repository root.
+The root [vercel.json](vercel.json) defines two services in one project. Its service paths are relative to that file.
+Keep this configuration at the repository root; do not add another `vercel.json` under `apps/client`.
+
+To import the whole app in Vercel:
+
+1. Import the GitHub repository and select the branch containing the root `vercel.json`.
+2. Set **Root Directory** to **`./`**, the repository root. Do not select `apps/client` or `apps/server`.
+3. Select **Services** as the **Application Preset**.
+4. Choose **Refresh** if needed. The service list should contain **client** and **server**. A suggested single
+   `app` service rooted at `apps/client` means the import is still looking at the frontend directory.
+5. Import the multi-service project. Each service owns its build settings in `vercel.json`; do not replace them
+   with a project-wide Vite build.
+
+Refresh rereads the selected Git branch and project directory. It does not upload local edits or search parent
+directories for this root configuration. Commit and push configuration changes before refreshing. The Vercel project
+name is only a label; it does not determine which services are deployed.
 
 | Service  | Root          | Public routes                                  |
 | -------- | ------------- | ---------------------------------------------- |
@@ -187,7 +201,11 @@ set to the repository root.
 | `server` | `apps/server` | `/api`, `/api/*`, `/ws`, `/healthz`, `/readyz` |
 
 The client is a static Vite build. The server uses Node.js 22 and `src/vercel.ts`.
-Browser requests use the same public domain; no internal service bindings or build-time backend URLs are needed.
+Browser requests use the same public domain: `/api/leaderboard` for standings and `/ws` for the game connection.
+The client service has no server-side functions calling the server, and the server calls no other service. There are
+therefore no internal-only services or service bindings in this deployment. Do not inject a private binding URL into
+the browser bundle or set a binding variable manually. A future server-side caller should declare a binding on that
+calling service and read the injected URL at function runtime.
 `/api/stats` is public under the API rewrite. The Dockerfile is an alternative combined deployment of these applications.
 
 ```bash
