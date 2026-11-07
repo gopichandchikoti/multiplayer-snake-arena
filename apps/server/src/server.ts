@@ -12,6 +12,9 @@ import { IpLimiter } from './security';
 import { Stats } from './stats';
 
 export interface GameServer {
+  /** The platform can own the listener while sharing the same HTTP and WebSocket state. */
+  readonly httpServer: Server;
+  initialize: () => Promise<void>;
   start: () => Promise<{ host: string; port: number }>;
   stop: () => Promise<void>;
   readonly rooms: RoomManager;
@@ -57,11 +60,19 @@ function listen(server: Server, config: ServerConfig): Promise<{ host: string; p
   });
 }
 
+function closeHttpServer(server: Server): Promise<void> {
+  return new Promise((resolve) => {
+    server.close(() => resolve());
+    server.closeAllConnections();
+  });
+}
+
 /** Wires the whole server together. Nothing is listening until `start()` is called. */
 export function createGameServer(config: ServerConfig, overrides: Overrides = {}): GameServer {
   const { clock, log, stats, leaderboard, rooms, hub } = buildParts(config, overrides);
   let ready = false;
   let gateway: Gateway | null = null;
+  let initialization: Promise<void> | undefined;
   const server = createServer(
     createHttpHandler({
       staticDir: config.staticDir,
@@ -73,19 +84,24 @@ export function createGameServer(config: ServerConfig, overrides: Overrides = {}
       now: clock.now,
     }),
   );
+  const initialize = (): Promise<void> =>
+    (initialization ??= leaderboard.load().then(() => {
+      const limiter = new IpLimiter(config.maxConnectionsPerIp);
+      const session = { hub, rooms, clock, log, stats };
+      gateway = attachGateway(server, { config, session, limiter, stats, log, clock });
+      ready = true;
+    }));
 
   return {
+    httpServer: server,
+    initialize,
     rooms,
     hub,
     stats,
     leaderboard,
     async start() {
-      await leaderboard.load();
-      const limiter = new IpLimiter(config.maxConnectionsPerIp);
-      const session = { hub, rooms, clock, log, stats };
-      gateway = attachGateway(server, { config, session, limiter, stats, log, clock });
+      await initialize();
       const address = await listen(server, config);
-      ready = true;
       log.info('server_listening', { ...address, production: config.production });
       return address;
     },
@@ -94,12 +110,7 @@ export function createGameServer(config: ServerConfig, overrides: Overrides = {}
       await gateway?.close();
       rooms.closeAll();
       hub.clear();
-      await new Promise<void>((resolve) => {
-        server.close(() => {
-          resolve();
-        });
-        server.closeAllConnections();
-      });
+      await closeHttpServer(server);
       await leaderboard.flush();
       log.info('server_stopped');
     },

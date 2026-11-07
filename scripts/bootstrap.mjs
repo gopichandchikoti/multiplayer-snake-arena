@@ -32,7 +32,7 @@ process.stdout.write(
   [
     '',
     'Ready. Next:',
-    '  pnpm dev       game at http://127.0.0.1:5720 (server on 5721)',
+    '  pnpm dev       game at http://127.0.0.1:5720 (server on 5722)',
     '  pnpm verify    lint, format check, typecheck, tests with coverage, build',
     '  pnpm e2e       browser tests (needs: node scripts/bootstrap.mjs --browsers)',
     '  pnpm start     production server on http://127.0.0.1:5722 after pnpm build',

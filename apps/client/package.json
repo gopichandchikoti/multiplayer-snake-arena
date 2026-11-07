@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Phaser 3 + React browser client for Multiplayer Snake Arena.",
   "scripts": {
-    "dev": "vite --port 5720 --strictPort",
+    "dev": "vite --strictPort",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
     "preview": "vite preview --port 5722 --strictPort",
     "typecheck": "tsc --noEmit -p tsconfig.json"

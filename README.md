@@ -1,90 +1,243 @@
 # Coilyard: Multiplayer Snake Arena
 
-Fast snake duels for 2 to 8 players, with a server that decides every move, crash and score. Play online in public or
-private rooms, watch a round, or practise offline against bots. No account, no tracking.
+A browser game for 2–8 players, with public matchmaking, private rooms, spectators, and practice against bots.
+The server decides movement, collisions, scores, and winners. You can play without creating an account.
 
-**Status:** v1.0.0, built from `07`-style spec "Multiplayer Snake Arena v1.0". Web application only (no APK).
-**Stack:** TypeScript (strict), Phaser 3.90 and React 19 client, Node 22 + `ws` server, one shared deterministic
-simulation package, Vite 8, Vitest 5, Playwright 1.64.
+![A practice match in Coilyard](docs/screenshots/e2e-practice-game.png)
 
-![Practice board](docs/screenshots/e2e-practice-game.png)
+## What you can do
 
-## Quick start
+- Join a public lobby with **Quick play**, or create a private room and share its five-character code or invite link.
+- Play with up to eight people and let up to sixteen spectators watch a room.
+- Practice against 1–7 bots at Easy, Normal, or Hard difficulty, entirely in your browser after the page loads.
+- Choose Parchment, Kiln, or Tidepool arenas, and collect Surge, Aegis, and Trim power-ups.
+- Use keyboard, swipe, or on-screen steering controls. Adjust sound, motion, and light/dark appearance in Settings.
+- View round summaries, separate local practice/online records, and a leaderboard for the current game server.
 
-Requires Node 22.12 or newer and pnpm 11.
+This is a web application built with TypeScript, React 19, Phaser 3, Vite 8, Node.js, and WebSockets.
+The [architecture guide](docs/ARCHITECTURE.md) explains the implementation with diagrams and source links.
+
+## Run locally
+
+### Requirements
+
+- Node.js **22.12 or newer**.
+- pnpm **11.28.3**, the version pinned in [package.json](package.json).
+- A modern browser. No database, external service, or API key is required.
+
+If pnpm is missing:
 
 ```bash
-git clone <this repo> && cd multiplayer-snake-arena
-node scripts/bootstrap.mjs --browsers   # installs dependencies (+ Chromium for the E2E tests)
-pnpm dev                                # http://127.0.0.1:5720  (game server on 5721)
+npm install -g pnpm@11.28.3
 ```
 
-Production build and run:
+From the repository root:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Open **http://127.0.0.1:5720**. Leave the terminal running; press Ctrl+C to stop it.
+
+| Process     | Local address         | Purpose                                          |
+| ----------- | --------------------- | ------------------------------------------------ |
+| Vite client | http://127.0.0.1:5720 | React/Phaser development app with hot reload     |
+| Game server | http://127.0.0.1:5722 | HTTP API, WebSocket sessions, rooms, and matches |
+
+Vite forwards `/api/*`, `/ws`, `/healthz`, and `/readyz` to the game server. Open the client address when developing.
+The default proxy target matches the server's default port. For a separately hosted development backend, set
+`SNAKE_SERVER` in the client process to its HTTP base URL.
+
+Alternatively, `node scripts/bootstrap.mjs` checks Node/pnpm and installs dependencies.
+Use `node scripts/bootstrap.mjs --browsers` when you also need Chromium for browser tests.
+
+### Run a production build locally
+
+Stop `pnpm dev` first because the production server uses the same backend port.
 
 ```bash
 pnpm build
-pnpm start                              # http://127.0.0.1:5722 (client and WebSocket on one port)
+pnpm start
 ```
 
-Open two browser tabs, choose **Play online**, create a room in one, join it with the code in the other, press **Ready**.
+Open **http://127.0.0.1:5722**. One Node process now serves both the built client and the game backend.
+The build produces `apps/client/dist/` and `apps/server/dist/main.mjs`.
 
 ## How to play
 
-Steer with the arrow keys or W A S D, by swiping on the arena, or with the on-screen pad (shown by default on touch
-devices). **P** pauses practice, **M** mutes. Eat apples (10) and golden apples (30), make others crash into your body
-(40), be the last snake alive (60). Surge, Aegis and Trim power-ups appear on the board. Most points after 120 seconds
-wins. Full rules and the reasoning behind the numbers: [docs/GAME_RULES.md](docs/GAME_RULES.md).
+### Practice
 
-## Commands
+1. Enter your name on the main menu.
+2. Choose **Practice against bots**.
+3. Select the number of bots, difficulty, and arena, then choose **Start practice**.
+4. Steer after the three-second countdown. Practice can be paused and does not affect the server leaderboard.
 
-| Command                                              | What it does                                                                                              |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`                                           | client dev server (5720) and game server (5721)                                                           |
-| `pnpm build` / `pnpm start`                          | production build; run it on 5722                                                                          |
-| `pnpm lint` / `pnpm format:check` / `pnpm typecheck` | static checks (complexity <= 10, cognitive <= 15, <= 4 parameters, <= 50 lines per function, 120 columns) |
-| `pnpm test` / `pnpm test:coverage`                   | 350 unit and integration tests; coverage gate 90 % on four metrics                                        |
-| `pnpm e2e`                                           | builds, then runs the Playwright suite on port 5730 against the production bundle                         |
-| `pnpm load -- --rooms 16 --seconds 40`               | load test: 16 rooms x 8 real clients                                                                      |
-| `pnpm verify`                                        | lint, format check, typecheck, coverage tests, build                                                      |
+### Play with friends
 
-## Verified results (this machine, Windows 11, Node 22.13.1, Chromium via Playwright)
+1. Open **Play online**, choose Private or Public, and select **Create room**.
+2. Share the room code or invite link. Friends open the same app, enter the code, and choose **Join**.
+3. Every seated player selects **Ready**. A match starts when at least two players are connected and everyone is ready.
+4. After a round, review the scores. The room returns to its lobby after twelve seconds; ready up for another round.
 
-- 350 Vitest tests pass; coverage 96.7 % statements, 92.2 % branches, 95.9 % functions, 98.2 % lines.
-- 18 Playwright tests pass (desktop and mobile projects), including axe accessibility scans of every main screen in light and dark.
-- Real-network latency tests at 50, 150 and 300 ms round trip: the player's own snake visibly turns within 46 to 79 ms.
-- Load test, 128 clients in 16 rooms: server tick lag p99 15.7 ms, 0 socket errors.
+To test multiplayer on one computer, use two tabs, choose different names, create a room in one, and join from the other.
+Tabs share saved browser settings and the local guest ID; use separate browser profiles to test independent identities.
 
-Details, the test matrix and what was **not** tested: [docs/TEST_REPORT.md](docs/TEST_REPORT.md) and
-[docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
+**Quick play** joins the fullest available public lobby or creates one, and marks you ready automatically.
+Use **Watch** beside a room code to spectate. Joining after a round has started also makes you a spectator until a
+later lobby has a free player seat.
+
+### Controls and scoring
+
+| Action                 | Control                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| Steer                  | Arrow keys or W/A/S/D                                   |
+| Steer on touch devices | Swipe on the arena or use the on-screen directional pad |
+| Pause/resume practice  | P or the on-screen pause control                        |
+| Mute/unmute            | M                                                       |
+| Close a dialog         | Escape                                                  |
+
+The arena is 40 × 28 cells. Rounds last up to 120 seconds, and end sooner when at most one snake remains.
+Avoid walls, other bodies, your own body, and head-on collisions. Direct reversal into your neck is rejected.
+
+| Event                                                           | Points |
+| --------------------------------------------------------------- | ------ |
+| Apple                                                           | 10     |
+| Golden apple                                                    | 30     |
+| Pellet from a crashed snake                                     | 5      |
+| Another snake crashes into your body, and you survive that tick | 40     |
+| Last snake standing                                             | 60     |
+
+Most points wins; ties use body length, then eliminations. A complete tie is a shared win.
+**Surge** doubles movement speed for five seconds, **Aegis** absorbs one crash within twelve seconds, and **Trim**
+halves your body length without reducing it below four cells. The [rules section](docs/ARCHITECTURE.md#simulation-and-game-rules)
+covers collision ordering and balance.
+
+A dropped online connection triggers automatic retries. Your seat is held for fifteen seconds, but your snake keeps
+moving while disconnected. Reconnecting can restore your seat even if the snake has already crashed.
 
 ## Configuration
 
-Environment variables, with defaults, in [.env.example](.env.example) and [docs/RELEASE.md](docs/RELEASE.md). Nothing needs a secret.
+[.env.example](.env.example) lists the server settings. The server reads environment variables; creating a root
+`.env` file alone does not load it automatically. To use that file with a built server:
 
-## Repository layout
-
-```
-packages/shared   seeded simulation, protocol schemas, codec, bots, prediction   (no I/O)
-apps/server       HTTP + WebSocket server, rooms, matches, leaderboard
-apps/client       React UI + Phaser arena + networking
-e2e/              Playwright suite          scripts/   bootstrap, load test, screenshots
-docs/             architecture, protocol, threat model, rules, test report, ADR, design references
+```bash
+# Copy .env.example to .env with your editor, then edit the values.
+pnpm build
+node --env-file=.env apps/server/dist/main.mjs
 ```
 
-## Documentation
+Exported shell variables also work with `pnpm start`. Keep the defaults for the combined `pnpm dev` command;
+Vercel independently assigns service ports through `PORT`.
 
-[Architecture](docs/ARCHITECTURE.md) | [Protocol and API](docs/PROTOCOL.md) | [Threat model](docs/THREAT_MODEL.md) |
-[Game rules](docs/GAME_RULES.md) | [Feature matrix](docs/FEATURE_MATRIX.md) | [Test report](docs/TEST_REPORT.md) |
-[Release](docs/RELEASE.md) | [Known limitations](docs/KNOWN_LIMITATIONS.md) | [Design references](docs/DESIGN_REFERENCES.md) |
-[ADR 0001](docs/adr/0001-stack-and-protocol.md) | [Feature log](FEATURE_LOG.md)
+| Variable                 | Default                                                 | Purpose                                                            |
+| ------------------------ | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| `HOST`                   | `127.0.0.1`                                             | Listen interface; use `0.0.0.0` inside a container                 |
+| `PORT`                   | `5722`                                                  | Game server port                                                   |
+| `NODE_ENV`               | development behavior when unset                         | `production` rejects WebSockets without an Origin header           |
+| `ALLOWED_ORIGINS`        | Same host; loopback origins also allowed in development | Comma-separated browser origins permitted to open sockets          |
+| `ALLOW_NO_ORIGIN`        | `false` in production, `true` otherwise                 | Explicit override for non-browser WebSocket clients                |
+| `LEADERBOARD_FILE`       | Empty: memory                                           | Optional JSON persistence on a long-lived host                     |
+| `STATIC_DIR`             | Auto-detected next to the server bundle                 | Directory containing the built client                              |
+| `MAX_CONNECTIONS_PER_IP` | `8`                                                     | Concurrent socket cap per client address                           |
+| `MAX_ROOMS`              | `200`                                                   | Total room cap                                                     |
+| `ROUND_TICKS`            | `1800`                                                  | Round duration at fifteen ticks per second                         |
+| `TRUST_PROXY`            | `false`                                                 | Trust the first forwarded client IP only behind a controlled proxy |
+| `LOG_LEVEL`              | `info`                                                  | `debug`, `info`, `warn`, or `error`                                |
 
-## Privacy
+## Development and checks
 
-The page stores your settings, a random guest ID and local records in your browser's `localStorage`. The server keeps rooms
-in memory and, optionally, win/score totals under that guest ID (never shown). There is no telemetry, no analytics and no
-third-party request: fonts and sounds are bundled or synthesised.
+| Command                                | Purpose                                                       |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `pnpm dev`                             | Start Vite and the game server with source watching           |
+| `pnpm build`                           | Type-check/build the client and bundle the standalone server  |
+| `pnpm start`                           | Run the built client and backend on port 5722                 |
+| `pnpm lint`                            | Run ESLint, including code complexity limits                  |
+| `pnpm format:check`                    | Check repository formatting                                   |
+| `pnpm typecheck`                       | Check all workspace packages                                  |
+| `pnpm test`                            | Run unit and integration tests                                |
+| `pnpm test:coverage`                   | Run tests with a 90% statements/branches/functions/lines gate |
+| `pnpm e2e`                             | Build and run desktop/mobile Playwright tests on port 5730    |
+| `pnpm load -- --rooms 16 --seconds 40` | Exercise sixteen rooms with eight socket clients each         |
+| `pnpm verify`                          | Lint, formatting, types, coverage tests, and production build |
 
-## Credits
+Install Chromium before the first browser test: `pnpm exec playwright install chromium`.
+Tests use their own server and do not need the development app to be stopped.
 
-Fonts: Bricolage Grotesque and Instrument Sans (SIL Open Font License, via Fontsource). All art and sound are generated in
-code. The Coilyard name and mark are original to this project.
+## Deployment
+
+### A single long-lived host
+
+Run the production bundle on one Node process, or build the included [Dockerfile](Dockerfile).
+Put TLS and a WebSocket-capable reverse proxy in front of it. Preserve the public Host and Origin headers, forward
+WebSocket upgrades, and set `ALLOWED_ORIGINS` to the app's public origin. Enable `TRUST_PROXY` only for a trusted proxy.
+Use persistent storage for `LEADERBOARD_FILE` if scores must survive restarts.
+
+The Docker image and GitHub Actions workflow are included but have not been verified in their target environments.
+Rooms and resume tokens remain in memory; a server restart ends active matches.
+
+### Vercel services
+
+The root [vercel.json](vercel.json) defines two services in one project. Import the repository with its Root Directory
+set to the repository root.
+
+| Service  | Root          | Public routes                                  |
+| -------- | ------------- | ---------------------------------------------- |
+| `client` | `apps/client` | `/` and all paths not assigned to the backend  |
+| `server` | `apps/server` | `/api`, `/api/*`, `/ws`, `/healthz`, `/readyz` |
+
+The client is a static Vite build. The server uses Node.js 22 and `src/vercel.ts`.
+Browser requests use the same public domain; no internal service bindings or build-time backend URLs are needed.
+`/api/stats` is public under the API rewrite. The Dockerfile is an alternative combined deployment of these applications.
+
+```bash
+pnpm dlx vercel@65.12.1 dev --local
+# For a linked Vercel project:
+pnpm dlx vercel@65.12.1 dev
+```
+
+Windows may need Developer Mode for Vercel's builder-cache symlinks. Without symlink access the CLI can fail before
+starting the services.
+
+**Treat the Vercel setup as a deployment preview.** Rooms, matchmaking, and reconnect tokens are owned by one process.
+Players and HTTP requests routed to different function instances can see different state. WebSockets also have a
+maximum function duration. A single region or container runtime does not guarantee one durable game instance.
+The Vercel entrypoint disables file persistence and static serving; the client service owns the page.
+See [deployment architecture](docs/ARCHITECTURE.md#deployment-and-operations) for the remaining production work.
+
+## Troubleshooting
+
+| Symptom                                    | Check                                                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| A port is already in use                   | Stop the old development/production process; the backend defaults to 5722                                    |
+| Practice works but online play fails       | Confirm both `pnpm dev` processes are running and `http://127.0.0.1:5720/readyz` returns 200                 |
+| A private room cannot be found             | Check the code and that every player uses the same server; private rooms are not accounts or permanent links |
+| A match does not start                     | At least two seated players must be connected and all must be ready                                          |
+| Production WebSocket handshake returns 403 | Check public Host/Origin forwarding and the exact `ALLOWED_ORIGINS` list                                     |
+| A phone cannot reach `127.0.0.1`           | Loopback addresses refer to that device; use a LAN-facing host and your computer's LAN IP                    |
+| Saved settings or records disappear        | Private browsing or blocked/full localStorage may prevent persistence                                        |
+| Leaderboard resets                         | Memory is the default; configure a persistent file on a long-lived host                                      |
+
+## Repository and documentation
+
+```text
+apps/client/        React screens, Phaser rendering, controls, networking, browser storage
+apps/server/        HTTP/WebSocket gateway, sessions, rooms, match loop, leaderboard
+packages/shared/    Deterministic simulation, protocol schemas, codecs, bots, prediction
+e2e/                Playwright gameplay, accessibility, security, and mobile tests
+scripts/            Setup, load tests, screenshots, and layout probes
+docs/ARCHITECTURE.md Implementation guide, flowcharts, protocol, security, testing, limitations
+docs/screenshots/   Gameplay and UI images
+```
+
+Documentation is kept in two maintained guides: this README for running and using the app, and
+[ARCHITECTURE.md](docs/ARCHITECTURE.md) for how it works.
+
+## Privacy and credits
+
+No sign-in, chat, advertising, or analytics is built into the app. Settings, a random guest ID, and local records are
+stored in your browser. The server keeps room/session state and optional per-server scores; guest IDs are excluded from
+public leaderboard responses. Diagnostic server logs can include client IP addresses when reporting connection issues.
+
+Bricolage Grotesque and Instrument Sans are bundled through Fontsource under the SIL Open Font License.
+Arena artwork is drawn in code, and sounds are synthesized with Web Audio.

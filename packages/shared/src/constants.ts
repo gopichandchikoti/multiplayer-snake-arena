@@ -1,4 +1,4 @@
-/** Tunable game numbers. docs/GAME_RULES.md explains the reasoning behind each one. */
+/** Tunable game numbers. See docs/ARCHITECTURE.md#simulation-and-game-rules for rules and balance. */
 export const PROTOCOL_VERSION = 1;
 
 export const TICK_RATE = 15;

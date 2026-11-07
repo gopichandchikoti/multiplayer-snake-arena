@@ -71,6 +71,27 @@ function rawGet(path: string): Promise<{ status: number; body: string }> {
 }
 
 describe('HTTP', () => {
+  it('initializes once when the platform owns the listener, with HTTP and sockets sharing rooms', async () => {
+    server = createGameServer(loadConfig({ PORT: '0' }), { clock, log: silentLogger });
+    const httpServer = server.httpServer;
+    expect(httpServer.listening).toBe(false);
+    await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve));
+    const address = httpServer.address();
+    if (!address || typeof address === 'string') throw new Error('expected a TCP listener');
+    port = address.port;
+    expect((await fetch(url('/readyz'))).status).toBe(503);
+    await Promise.all([server.initialize(), server.initialize()]);
+    expect(httpServer.listenerCount('upgrade')).toBe(1);
+    expect((await fetch(url('/readyz'))).status).toBe(200);
+    const [a, b] = [await greeted('Ada'), await greeted('Bo')];
+    a.send({ type: 'create_room', visibility: 'private', theme: 'parchment' });
+    const code = (await a.next('room')).room?.code ?? '';
+    b.send({ type: 'join_room', code });
+    expect((await b.next('room')).room?.players).toHaveLength(2);
+    expect(await (await fetch(url('/api/stats'))).json()).toMatchObject({ rooms: 1, connected: 2 });
+    expect((await fetch(url('/'))).status).toBe(404);
+  });
+
   it('reports health, readiness, stats and an honest leaderboard', async () => {
     await boot();
     expect(await (await fetch(url('/healthz'))).json()).toEqual({ status: 'ok' });

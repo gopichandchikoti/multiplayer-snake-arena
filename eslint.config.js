@@ -57,7 +57,7 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
-    // Test files: `describe` callbacks are naturally long, each `it` stays small; see docs/KNOWN_LIMITATIONS.md.
+    // Test files: `describe` callbacks are naturally long; see docs/ARCHITECTURE.md#testing-and-development-workflow.
     files: ['**/test/**/*.{ts,tsx}', 'e2e/**/*.ts'],
     rules: {
       'max-lines-per-function': 'off',
