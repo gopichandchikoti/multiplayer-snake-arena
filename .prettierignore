@@ -5,3 +5,5 @@ playwright-report
 test-results
 pnpm-lock.yaml
 docs/screenshots
+
+.github/pull_request_template.md
