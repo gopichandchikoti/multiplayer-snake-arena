@@ -3,6 +3,7 @@
 A browser game for 2–8 players, with public matchmaking, private rooms, spectators, and practice against bots.
 The server decides movement, collisions, scores, and winners. You can play without creating an account.
 
+**Live demo:** https://multiplayer-snake-arena.vercel.app
 ![A practice match in Coilyard](docs/screenshots/e2e-practice-game.png)
 
 ## What you can do
